@@ -5,8 +5,20 @@ import { useAuth } from '@/contexts/AuthContext';
 const Index = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Show loading while checking authentication status
+  // Reduce the loading time by directly redirecting after a short timeout
   if (isLoading) {
+    // After 2 seconds, redirect to login if still loading
+    React.useEffect(() => {
+      const timer = setTimeout(() => {
+        if (isLoading) {
+          console.log('Loading timeout reached, redirecting to login');
+          window.location.href = '/login';
+        }
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }, [isLoading]);
+
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center">
