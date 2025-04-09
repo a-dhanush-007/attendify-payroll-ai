@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 id: currentSession.user.id,
                 email: profile.email,
                 name: profile.name,
-                role: profile.role,
+                role: profile.role as UserRole,
                 created_at: profile.created_at
               });
             }
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               id: initialSession.user.id,
               email: profile.email,
               name: profile.name,
-              role: profile.role,
+              role: profile.role as UserRole,
               created_at: profile.created_at
             });
           }
