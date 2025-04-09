@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
 import Payroll from "./pages/Payroll";
+import Workers from "./pages/Workers";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
@@ -50,6 +51,7 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/attendance" element={<Attendance />} />
                 <Route path="/payroll" element={<Payroll />} />
+                <Route path="/workers" element={<Workers />} />
                 {/* Add other routes inside the AppShell layout */}
               </Route>
               
