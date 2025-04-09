@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Edit, Trash2, Clock, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Profile {
   id: string;
@@ -34,9 +35,12 @@ interface Profile {
 
 interface WorkersListProps {
   workers: Profile[];
+  onDeleteWorker: (id: string) => void;
+  onEditWorker: (worker: Profile) => void;
+  refetchWorkers: () => void;
 }
 
-const WorkersList: React.FC<WorkersListProps> = ({ workers }) => {
+const WorkersList: React.FC<WorkersListProps> = ({ workers, onDeleteWorker, onEditWorker, refetchWorkers }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -61,6 +65,7 @@ const WorkersList: React.FC<WorkersListProps> = ({ workers }) => {
   };
 
   const handleViewAttendance = (workerId: string, name: string) => {
+    // For future implementation
     toast({
       title: "Feature coming soon",
       description: `Viewing attendance for ${name} will be available in the next update.`
@@ -68,23 +73,10 @@ const WorkersList: React.FC<WorkersListProps> = ({ workers }) => {
   };
 
   const handleViewPayroll = (workerId: string, name: string) => {
+    // For future implementation
     toast({
       title: "Feature coming soon",
       description: `Viewing payroll for ${name} will be available in the next update.`
-    });
-  };
-
-  const handleEditWorker = (id: string) => {
-    toast({
-      title: "Feature coming soon",
-      description: "Worker editing functionality will be added in the next update."
-    });
-  };
-
-  const handleDeleteWorker = (id: string, name: string) => {
-    toast({
-      title: "Feature coming soon",
-      description: `Deleting ${name || 'worker'} will be available in the next update.`
     });
   };
 
@@ -116,11 +108,11 @@ const WorkersList: React.FC<WorkersListProps> = ({ workers }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleEditWorker(worker.id)}>
+                  <DropdownMenuItem onClick={() => onEditWorker(worker)}>
                     <Edit className="mr-2 h-4 w-4" />
                     <span>Edit</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDeleteWorker(worker.id, worker.name || '')}>
+                  <DropdownMenuItem onClick={() => onDeleteWorker(worker.id)}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     <span>Delete</span>
                   </DropdownMenuItem>
