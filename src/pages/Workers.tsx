@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { UserPlus, Loader2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import WorkersList from '@/components/Workers/WorkersList';
-import WorkerForm from '@/components/Workers/WorkerForm';
+import WorkerForm, { WorkerFormValues } from '@/components/Workers/WorkerForm';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/types';
 import {
@@ -34,12 +33,6 @@ interface Profile {
   email: string;
   role: string;
   created_at: string;
-}
-
-interface FormValues {
-  name: string;
-  email: string;
-  role: string;
 }
 
 const Workers = () => {
@@ -74,8 +67,7 @@ const Workers = () => {
   });
 
   const addWorkerMutation = useMutation({
-    mutationFn: async (values: FormValues) => {
-      // Generate a random UUID for the new worker
+    mutationFn: async (values: WorkerFormValues) => {
       const workerId = crypto.randomUUID();
       
       const { error } = await supabase
@@ -113,7 +105,7 @@ const Workers = () => {
   });
 
   const updateWorkerMutation = useMutation({
-    mutationFn: async (values: FormValues & { id: string }) => {
+    mutationFn: async (values: WorkerFormValues & { id: string }) => {
       const { error } = await supabase
         .from('profiles')
         .update({ 
@@ -187,7 +179,7 @@ const Workers = () => {
     );
   }, [workers, searchQuery]);
 
-  const handleAddWorker = (values: FormValues) => {
+  const handleAddWorker = (values: WorkerFormValues) => {
     addWorkerMutation.mutate(values);
   };
 
@@ -196,7 +188,7 @@ const Workers = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateWorker = (values: FormValues) => {
+  const handleUpdateWorker = (values: WorkerFormValues) => {
     if (selectedWorker) {
       updateWorkerMutation.mutate({ ...values, id: selectedWorker.id });
     }
@@ -265,7 +257,6 @@ const Workers = () => {
         />
       )}
 
-      {/* Add Worker Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -281,7 +272,6 @@ const Workers = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Worker Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -305,7 +295,6 @@ const Workers = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Worker Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

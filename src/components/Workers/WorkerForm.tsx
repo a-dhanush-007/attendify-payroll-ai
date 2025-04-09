@@ -22,21 +22,18 @@ import {
 } from '@/components/ui/select';
 import { UserRole } from '@/types';
 
-const workerFormSchema = z.object({
+// Define the schema for form validation
+export const workerFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   role: z.enum(['admin', 'supervisor', 'builder']),
 });
 
-type WorkerFormValues = z.infer<typeof workerFormSchema>;
+// Export the type for use in other components
+export type WorkerFormValues = z.infer<typeof workerFormSchema>;
 
 interface WorkerFormProps {
-  defaultValues?: {
-    id?: string;
-    name?: string;
-    email?: string;
-    role?: UserRole;
-  };
+  defaultValues?: Partial<WorkerFormValues> & { id?: string };
   onSubmit: (values: WorkerFormValues) => void;
   isSubmitting: boolean;
 }
@@ -52,7 +49,11 @@ const WorkerForm: React.FC<WorkerFormProps> = ({
 }) => {
   const form = useForm<WorkerFormValues>({
     resolver: zodResolver(workerFormSchema),
-    defaultValues,
+    defaultValues: {
+      name: defaultValues.name || '',
+      email: defaultValues.email || '',
+      role: defaultValues.role || 'builder',
+    },
   });
 
   return (
