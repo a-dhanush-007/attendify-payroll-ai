@@ -19,6 +19,7 @@ export interface AttendanceRecord {
   validated: boolean;
   validated_by?: string;
   notes?: string;
+  created_at?: string;
 }
 
 export interface PayrollRecord {
@@ -41,20 +42,18 @@ export interface DashboardStats {
 }
 
 export interface ShiftConfig {
-  morning: {
-    start: string; // "08:00"
-    end: string; // "16:00"
-    rate: number; // Base hourly rate
-  };
-  afternoon: {
-    start: string;
-    end: string;
-    rate: number;
-  };
-  night: {
-    start: string;
-    end: string;
-    rate: number;
-  };
-  overtime_multiplier: number;
+  id: string;
+  shift_name: string;
+  start_time: string; // "08:00"
+  end_time: string; // "16:00"
+  rate: number;
+}
+
+export interface SystemSetting {
+  id: string;
+  key: string;
+  value: any;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
 }

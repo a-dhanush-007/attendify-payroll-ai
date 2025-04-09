@@ -2,12 +2,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, UserRole } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, AuthError } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
   isAuthenticated: boolean;
   hasRole: (roles: UserRole | UserRole[]) => boolean;
 }
@@ -28,61 +32,138 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Mock authentication - this would be replaced with Supabase auth
   useEffect(() => {
-    const checkAuth = () => {
-      const savedUser = localStorage.getItem('attendify_user');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          try {
+            // Fetch user profile data to get role information
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', currentSession.user.id)
+              .single();
+              
+            if (error) throw error;
+            
+            if (profile) {
+              setUser({
+                id: currentSession.user.id,
+                email: profile.email,
+                name: profile.name,
+                role: profile.role,
+                created_at: profile.created_at
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+        
+        setIsLoading(false);
       }
-      setIsLoading(false);
+    );
+    
+    // Then check for existing session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        if (initialSession?.user) {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', initialSession.user.id)
+            .single();
+            
+          if (error) throw error;
+          
+          if (profile) {
+            setUser({
+              id: initialSession.user.id,
+              email: profile.email,
+              name: profile.name,
+              role: profile.role,
+              created_at: profile.created_at
+            });
+          }
+          
+          setSession(initialSession);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
-    checkAuth();
+    initializeAuth();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     
     try {
-      // This is a mock implementation - replace with Supabase auth
-      // In a real app, we'd validate credentials against Supabase
-      
-      // For demo purposes, we'll check specific email patterns to determine role
-      let role: UserRole;
-      if (email.includes('admin')) {
-        role = 'admin';
-      } else if (email.includes('supervisor')) {
-        role = 'supervisor';
-      } else {
-        role = 'builder';
-      }
-      
-      const mockUser: User = {
-        id: Math.random().toString(36).substring(2, 15),
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        role,
-        name: email.split('@')[0],
-      };
+        password
+      });
       
-      localStorage.setItem('attendify_user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      if (error) throw error;
+      
       navigate('/dashboard');
     } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+      const authError = error as AuthError;
+      console.error('Login error:', authError);
+      
+      let errorMessage = 'Failed to sign in. Please check your credentials and try again.';
+      
+      // Provide more specific error messages for common scenarios
+      if (authError.message.includes('Email not confirmed')) {
+        errorMessage = 'Please verify your email address before signing in.';
+      } else if (authError.message.includes('Invalid login credentials')) {
+        errorMessage = 'Invalid email or password.';
+      }
+      
+      toast({
+        title: "Authentication error",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      
+      throw authError;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signOut = () => {
-    localStorage.removeItem('attendify_user');
-    setUser(null);
-    navigate('/login');
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing you out.",
+        variant: "destructive"
+      });
+    }
   };
 
   const hasRole = (roles: UserRole | UserRole[]) => {
@@ -97,6 +178,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const value = {
     user,
+    session,
     isLoading,
     signIn,
     signOut,

@@ -9,7 +9,162 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      attendance: {
+        Row: {
+          check_in: string
+          check_out: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          shift: string
+          status: string
+          user_id: string
+          validated: boolean | null
+          validated_by: string | null
+        }
+        Insert: {
+          check_in?: string
+          check_out?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          shift: string
+          status: string
+          user_id: string
+          validated?: boolean | null
+          validated_by?: string | null
+        }
+        Update: {
+          check_in?: string
+          check_out?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          shift?: string
+          status?: string
+          user_id?: string
+          validated?: boolean | null
+          validated_by?: string | null
+        }
+        Relationships: []
+      }
+      payroll: {
+        Row: {
+          created_at: string
+          id: string
+          overtime_hours: number
+          period_end: string
+          period_start: string
+          rate: number
+          regular_hours: number
+          status: string
+          total_pay: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          overtime_hours?: number
+          period_end: string
+          period_start: string
+          rate: number
+          regular_hours?: number
+          status?: string
+          total_pay: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          overtime_hours?: number
+          period_end?: string
+          period_start?: string
+          rate?: number
+          regular_hours?: number
+          status?: string
+          total_pay?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          name?: string | null
+          role: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          role?: string
+        }
+        Relationships: []
+      }
+      shift_config: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          rate: number
+          shift_name: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          rate?: number
+          shift_name: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          rate?: number
+          shift_name?: string
+          start_time?: string
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

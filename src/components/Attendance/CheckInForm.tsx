@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const CheckInForm = () => {
   const { toast } = useToast();
@@ -26,8 +27,19 @@ const CheckInForm = () => {
     setIsSubmitting(true);
     
     try {
-      // This would call the Supabase function to record attendance
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Insert attendance record into Supabase
+      const { data, error } = await supabase
+        .from('attendance')
+        .insert({
+          user_id: employeeId,
+          shift,
+          status: 'present', // Default status
+          notes: notes.trim() || null
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
       
       toast({
         title: "Check-in recorded",
