@@ -43,8 +43,8 @@ const queryClient = new QueryClient({
       retry: 1,
       staleTime: 30000,
       gcTime: 60000, // Changed from cacheTime to gcTime which is the new property name
-      retryDelay: 1000,
-      timeout: 10000
+      retryDelay: 1000
+      // Removed the 'timeout' property as it doesn't exist in @tanstack/react-query options
     }
   }
 });
