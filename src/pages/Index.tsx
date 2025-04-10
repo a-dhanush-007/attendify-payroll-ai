@@ -1,4 +1,5 @@
 
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -8,7 +9,7 @@ const Index = () => {
   // Reduce the loading time by directly redirecting after a short timeout
   if (isLoading) {
     // After 2 seconds, redirect to login if still loading
-    React.useEffect(() => {
+    useEffect(() => {
       const timer = setTimeout(() => {
         if (isLoading) {
           console.log('Loading timeout reached, redirecting to login');

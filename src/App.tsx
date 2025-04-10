@@ -42,7 +42,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 30000,
-      cacheTime: 60000,
+      gcTime: 60000, // Changed from cacheTime to gcTime which is the new property name
       retryDelay: 1000,
       timeout: 10000
     }
