@@ -31,6 +31,7 @@ const Index = () => {
   }
 
   // Redirect to dashboard if authenticated, otherwise to login
+  console.log("Index page redirecting based on auth state:", isAuthenticated ? "to dashboard" : "to login");
   return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
 };
 

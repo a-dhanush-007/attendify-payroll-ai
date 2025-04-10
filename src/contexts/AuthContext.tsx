@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        console.log("Auth state change event:", event);
         setSession(currentSession);
         
         if (currentSession?.user) {
@@ -57,11 +58,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             if (profile) {
               setUser({
                 id: currentSession.user.id,
-                email: profile.email,
+                email: profile.email || currentSession.user.email,
                 name: profile.name,
                 role: profile.role as UserRole,
                 created_at: profile.created_at
               });
+              console.log("User profile loaded:", profile);
             }
           } catch (error) {
             console.error('Error fetching user profile:', error);
@@ -79,6 +81,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const initializeAuth = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
+        console.log("Initial session check:", initialSession ? "Session found" : "No session");
         
         if (initialSession?.user) {
           const { data: profile, error } = await supabase
@@ -92,11 +95,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (profile) {
             setUser({
               id: initialSession.user.id,
-              email: profile.email,
+              email: profile.email || initialSession.user.email,
               name: profile.name,
               role: profile.role as UserRole,
               created_at: profile.created_at
             });
+            console.log("Initial user profile loaded:", profile);
           }
           
           setSession(initialSession);
@@ -119,14 +123,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting to sign in with:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
       if (error) throw error;
+      console.log("Sign in successful:", data);
       
-      navigate('/dashboard');
+      // We don't need to navigate here - the auth state change listener will handle it
+      // The onAuthStateChange event will trigger and update the user state
+      
     } catch (error) {
       const authError = error as AuthError;
       console.error('Login error:', authError);

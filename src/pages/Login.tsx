@@ -6,7 +6,7 @@ import { Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +23,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -36,14 +37,16 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      console.log("Submitting login form with email:", values.email);
       await signIn(values.email, values.password);
       toast({
         title: 'Login successful',
         description: 'Welcome to AttendifyPro!',
       });
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Login error:', error);
-      // Error messages are now handled in the AuthContext
+      console.error('Login submit error:', error);
+      // Error messages are handled in the AuthContext
     } finally {
       setIsLoading(false);
     }
