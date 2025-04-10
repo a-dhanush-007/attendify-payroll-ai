@@ -1,25 +1,26 @@
 
 import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-  // Reduce the loading time by directly redirecting after a short timeout
+  // Reduce the loading time and improve navigation
+  useEffect(() => {
+    // If still loading after 2 seconds, navigate to login
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.log('Loading timeout reached, redirecting to login');
+        navigate('/login');
+      }
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [isLoading, navigate]);
+
   if (isLoading) {
-    // After 2 seconds, redirect to login if still loading
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        if (isLoading) {
-          console.log('Loading timeout reached, redirecting to login');
-          window.location.href = '/login';
-        }
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }, [isLoading]);
-
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center">

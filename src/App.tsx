@@ -1,11 +1,12 @@
 
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { setupDemoAccounts } from "./utils/initializeApp";
 
 // Layouts
 import AppShell from "./components/Layout/AppShell";
@@ -44,10 +45,19 @@ const queryClient = new QueryClient({
       staleTime: 30000,
       gcTime: 60000, // Changed from cacheTime to gcTime which is the new property name
       retryDelay: 1000
-      // Removed the 'timeout' property as it doesn't exist in @tanstack/react-query options
     }
   }
 });
+
+// AppInitializer component to handle initialization logic
+const AppInitializer = () => {
+  useEffect(() => {
+    // Set up demo accounts when the app first loads
+    setupDemoAccounts();
+  }, []);
+
+  return null;
+};
 
 const App = () => (
   <React.StrictMode>
@@ -57,6 +67,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <AppInitializer />
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />

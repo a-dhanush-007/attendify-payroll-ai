@@ -11,6 +11,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { supabase } from '@/integrations/supabase/client';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -47,6 +48,31 @@ const Login = () => {
     } catch (error) {
       console.error('Login submit error:', error);
       // Error messages are handled in the AuthContext
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (email: string) => {
+    setIsLoading(true);
+    form.setValue("email", email);
+    form.setValue("password", "password123");
+    
+    try {
+      await signIn(email, "password123");
+      toast({
+        title: 'Demo login successful',
+        description: `Welcome to AttendifyPro as ${email}!`,
+      });
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Demo login error:', error);
+      // Explicitly handle demo login errors
+      toast({
+        title: 'Login failed',
+        description: 'Could not log in with demo credentials. Please try again.',
+        variant: 'destructive'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -135,9 +161,19 @@ const Login = () => {
               </Button>
             </div>
             <div className="text-sm text-center text-muted-foreground">
-              <p>Demo login credentials:</p>
-              <p>admin@example.com / supervisor@example.com / builder@example.com</p>
-              <p>Password: password123</p>
+              <p>Demo login:</p>
+              <div className="flex justify-center space-x-2 mt-1">
+                <Button variant="outline" size="sm" onClick={() => handleDemoLogin("admin@example.com")} disabled={isLoading}>
+                  Admin
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleDemoLogin("supervisor@example.com")} disabled={isLoading}>
+                  Supervisor
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleDemoLogin("builder@example.com")} disabled={isLoading}>
+                  Builder
+                </Button>
+              </div>
+              <p className="mt-1">Password: password123</p>
             </div>
           </CardFooter>
         </Card>

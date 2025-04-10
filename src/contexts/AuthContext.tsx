@@ -37,6 +37,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+      
+      return profile;
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -47,14 +67,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (currentSession?.user) {
           try {
             // Fetch user profile data to get role information
-            const { data: profile, error } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', currentSession.user.id)
-              .single();
+            const profile = await fetchUserProfile(currentSession.user.id);
               
-            if (error) throw error;
-            
             if (profile) {
               setUser({
                 id: currentSession.user.id,
@@ -64,6 +78,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 created_at: profile.created_at
               });
               console.log("User profile loaded:", profile);
+            } else {
+              // If no profile exists, we'll set minimal user data
+              setUser({
+                id: currentSession.user.id,
+                email: currentSession.user.email || '',
+                name: currentSession.user.user_metadata?.name || '',
+                role: (currentSession.user.user_metadata?.role as UserRole) || 'builder',
+                created_at: new Date().toISOString()
+              });
+              console.log("No profile found, using minimal user data");
             }
           } catch (error) {
             console.error('Error fetching user profile:', error);
@@ -84,14 +108,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.log("Initial session check:", initialSession ? "Session found" : "No session");
         
         if (initialSession?.user) {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', initialSession.user.id)
-            .single();
+          const profile = await fetchUserProfile(initialSession.user.id);
             
-          if (error) throw error;
-          
           if (profile) {
             setUser({
               id: initialSession.user.id,
@@ -101,6 +119,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               created_at: profile.created_at
             });
             console.log("Initial user profile loaded:", profile);
+          } else {
+            // If no profile exists, we'll set minimal user data
+            setUser({
+              id: initialSession.user.id,
+              email: initialSession.user.email || '',
+              name: initialSession.user.user_metadata?.name || '',
+              role: (initialSession.user.user_metadata?.role as UserRole) || 'builder',
+              created_at: new Date().toISOString()
+            });
+            console.log("No profile found during initialization, using minimal user data");
           }
           
           setSession(initialSession);
